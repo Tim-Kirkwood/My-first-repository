@@ -131,7 +131,7 @@ Procedure:
 
 # Example use:
 ## (1) Preliminaries
-Take BGC from MIBIG, and and analyse with CBLASTER via the command line or CAGECAT web server.  **NOTE: cblaster must be run with these settings** - 
+Take BGC from MIBIG, and and analyse with CBLASTER via the command line or CAGECAT web server. ⚠️**WARNING: cblaster must be run with these settings - **⚠️  
 ## (2) Collect neighbourhoods  
 ### Starting directory structure:
 ```
@@ -151,7 +151,8 @@ folder/with/binary/neighbourhood/organism1.gbk, organism2.gbk...organism157.gbk
                   /genomes      /organism1.gbk, organism2.gbk...organism157.gbk         ###only if -wg!
                   /log.txt
 ```
-<span style="color:red">157 neighbourhoods is a lot for a synteny plot :( </span>
+#### 🔴 157 neighbourhoods is a lot for a synteny plot 🔴
+
 
 ## (3) Sieve neighbourhoods
 ### Starting directory structure 
@@ -169,5 +170,5 @@ folder/with/binary/neighbourhood/organism1.gbk, ...
                                 /ClusterSieve/organism1.gbk, ...organism38.gbk
                                              /log.txt
 ```
-#### 38 neighbourhoods is OK for a synteny plot :)
+#### :green_heart: 38 neighbourhoods is OK for a synteny plot :green_heart:
 (note, filenames are to show number of files - `neighbourhood/ClusterSieve/organism1.gbk` is in the `neighbourhood` folder, but `neighbourhood/organism1.gbk` may be different to `neighbourhood/ClusterSieve/organism1.gbk`)
