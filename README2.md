@@ -17,7 +17,15 @@ Whilst synteny plots are often included as part of larger software suites (e.g. 
 ```
 pip install SyntenyQC
 ```
+Note - `SyntenyQC` depends on [BLAST+](https://blast.ncbi.nlm.nih.gov/doc/blast-help/downloadblastdata.html), which must be [installed](https://www.ncbi.nlm.nih.gov/books/NBK569861/) by the user (tested with v2.12.0 - but should work with other versions unless there are parameter changes). If this is installed correctly, you should be able to see help messages after typing `blastp -h` and `makeblastdb -h`. 
 
+## Tests
+Tests are performed using [pytest](https://pypi.org/project/pytest/), but are not distributed with `SyntenyQC`.  To run tests:
+
+1) Install pytest
+2) Clone the `SyntenyQC` [github repository](https://github.com/Tim-Kirkwood/SyntenyQC).
+3) Navigate to the cloned repository (on Windows, type `cd path/to/cloned/repository`).
+4) Type `pytest`. 
 ## Usage
 ### General help:
 ```
