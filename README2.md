@@ -1,6 +1,8 @@
 # SyntenyQC
 ## Motivation: 
-Synteny plots are widely used for the comparison of genomic neighbourhoods, particularly in the context of genome mining.  Whilst synteny plots are typically included as part of larger software suites (e.g. antiSMASH ClusterBlast module), various low-code stand-alone tools are now available that allow users to source candidate neighbourhoods and build their own synteny plots.  However, a gap remains between: 
+Synteny plots are widely used for the comparison of genomic neighbourhoods, which is particularly relevant to the field of genome mining (i.e. the predicton of metabolite pathways based on genome sequence).  
+
+Whilst synteny plots are often included as part of larger software suites (e.g. the `antiSMASH` ClusterBlast module), various low-code, stand-alone tools are now available that allow users to source candidate neighbourhoods and build their own synteny plots.  However, a gap remains between: 
 
 **(i) tools that source these candidate neighbourhoods** (e.g. `cblaster`, which can find hundreds of candidates), 
 
@@ -9,13 +11,7 @@ Synteny plots are widely used for the comparison of genomic neighbourhoods, part
 **(iii) the synteny plots themselves**, which become much harder to analyse/present as the number of neighbourhoods they include increases.
 
 ## Description: 
-`SyntenyQC` is a python app for the curation of neighbourhoods immediately prior to synteny plot creation. `SyntenyQC` supports the systematic definition and annotation of candidate neighbourhoods based on a direct integration to `cblaster`, a popular tool for finding clustered homologs to a user-supplied query.  `SytenyQC` also offers a flexible method for objectively removing redundant neighbourhoods (sourced using `cblaster` or any other tool) prior to synteny plot creation.  This is in some cases an absolute requirement (e.g. `cblaster` called via the `CAGECAT` webserver places a limit of 50 neighbourhoods).  
-
-## References
-cblaster 
-clinker
-Cagecat
-antiSMASH ClusterBlast
+`SyntenyQC` is a python app for the curation of neighbourhoods immediately prior to synteny plot creation. `SyntenyQC collect` supports the systematic definition and annotation of candidate neighbourhoods based on a direct integration to `cblaster`.  `SytenyQC sieve` offers a flexible method for objectively removing redundant neighbourhoods (sourced using `cblaster` or any other tool) prior to synteny plot creation.  This is in some cases an absolute requirement (e.g. `cblaster` called via the `CAGECAT` webserver places a limit of 50 neighbourhoods).  
 
 ## Installation 
 ```
@@ -36,10 +32,10 @@ subcommands:
 ```
 ### Collect subcommand:
 ```
-SyntenyQC collect -h
+>SyntenyQC collect -h
 usage: SyntenyQC collect [-h] -bp -ns -em [-fn] [-sp] [-wg]
 
-Write genbank files corresponding to cblaster neighbourhoods from a specified CSV-format binary file loacted at
+Write genbank files corresponding to cblaster neighbourhoods from a specified CSV-format binary file located at
 BINARY_PATH.  For each cblaster hit accession in the binary file:
 
 1) A record is downloaded from NCBI using the accession.  NCBI requires a user EMAIL to search for this record
@@ -52,9 +48,9 @@ BINARY_PATH.  For each cblaster hit accession in the binary file:
    is 50000, the record is discarded.
 4) If FILENAMES is "organism", the nighbourhood is written to file called *organism*.gbk. If FILENAMES is
    "accession", the neighbourhood is written to *accession*.gbk. Synteny softwares such as clinker can use these
-   filesnames to label synetny plot samples.
+   filenames to label synetny plot samples.
 
-Once COLLECT has been run, a new folder with the same name as the binary file should be created in the directory
+Once COLLECT has been run, a new folder with the same name as the binary file will be seen in the directory
 that holds the binary file (i.e. the file "path/to/binary/file.txt" will generate the folder "path/to/binary/file").
 This folder will have a subdirectory called "neighbourhood", containing all of the neighbourhood genbank files
 (i.e. "path/to/binary/file/neighbourhood"). If WRITE_GENOMES is specified, a second direcory ("genome") will also
@@ -114,7 +110,7 @@ options:
   -sf, --similarity_filter
                         Similarity threshold above which two neighbourhoods are considered redundant
 ```
-#### Sieve pruning algorithm:
+### Sieve pruning algorithm:
 ```
 Data: RBH graph
 Result: Nodes from pruned RBH graph
@@ -131,14 +127,16 @@ Procedure:
 
 # Example use:
 ## (1) Preliminaries
-Take BGC from MIBIG, and and analyse with CBLASTER via the command line or CAGECAT web server. ⚠️**WARNING: cblaster must be run with these settings - **⚠️  
+Take the [actinorhodin BGC from MIBIG](https://mibig.secondarymetabolites.org/repository/BGC0000194/index.html#r1c1), and analyse with `cblaster` via the command line or `CAGECAT` web server. This will generate a set of files, one of which will be a 'binary file', stored at `folder/with/binary.csv`. To show that even stringent searches can generate many hits, all core biosynthetic genes (`-r CAC44200.1;CAC44201.1`) and >= 11 hits (`-mh 11`) were required for each hit neighbourhood.
+
+**⚠️WARNING: To use a binary file in `SyntenyQC collect`, `cblaster` must be run with a ',' binary delimeter and no intermediate genes (`-bde ','` and no `-ig` flag)⚠️**  
 ## (2) Collect neighbourhoods  
 ### Starting directory structure:
 ```
 folder/with/binary.csv
 ```
         
-### Command (neighbourhood size kb = 2 x BGC length):
+### Command (neighbourhood size 42566kb = 2 x BGC length):
      
 ```
 SyntenyQC collect -bp path/to/BGC0000194_binary.txt -ns 42566 -em my_email@domain.com -fn organism -sp -wg
@@ -169,6 +167,40 @@ SyntenyQC sieve -gf folder/with/binary/neighbourhood -sf 0.7
 folder/with/binary/neighbourhood/organism1.gbk, ...
                                 /ClusterSieve/organism1.gbk, ...organism38.gbk
                                              /log.txt
+                                             /RBH_graph.html
+                                             /RBH_histogram.html
 ```
 #### :green_heart: 38 neighbourhoods is OK for a synteny plot :green_heart:
-(note, filenames are to show number of files - `neighbourhood/ClusterSieve/organism1.gbk` is in the `neighbourhood` folder, but `neighbourhood/organism1.gbk` may be different to `neighbourhood/ClusterSieve/organism1.gbk`)
+## Notes 
+- Filenames are to show number of files - `neighbourhood/ClusterSieve/organism1.gbk` is in the `neighbourhood` folder, but `neighbourhood/organism1.gbk` may be different to 
+  `neighbourhood/ClusterSieve/organism1.gbk`
+- `RBH_graph` is an interactive html picture of the similarity graph created by `SyntenyQC sieve` (before pruning), only showing edges with a similarity > `min_edge_view`. 
+ Edges are black (< `similairty_filter`) or red (>= `similarity_filter`).
+- `RBH_histogram` shows the distribution of edge weights.
+
+## References
+### `cblaster`
+
+**Paper:** Cameron L M Gilchrist, Thomas J Booth, Bram van Wersch, Liana van Grieken, Marnix H Medema, Yit-Heng Chooi, cblaster: a remote search tool for rapid identification and visualization of homologous gene clusters, Bioinformatics Advances, Volume 1, Issue 1, 2021, vbab016, https://doi.org/10.1093/bioadv/vbab016 
+
+**Docs:** https://cblaster.readthedocs.io/en/latest/ 
+
+### `clinker` 
+
+**Paper:** Cameron L M Gilchrist, Yit-Heng Chooi, clinker & clustermap.js: automatic generation of gene cluster comparison figures, Bioinformatics, Volume 37, Issue 16, August 2021, Pages 2473–2475, https://doi.org/10.1093/bioinformatics/btab007 
+
+**Docs:** https://github.com/gamcil/clinker 
+
+### `CAGECAT`
+
+**Paper:** van den Belt, M., Gilchrist, C., Booth, T.J. et al. CAGECAT: The CompArative GEne Cluster Analysis Toolbox for rapid search and visualisation of homologous gene clusters. BMC Bioinformatics 24, 181 (2023). https://doi.org/10.1186/s12859-023-05311-2
+
+**Website:** https://cagecat.bioinformatics.nl/ 
+
+### `antiSMASH` 
+
+**Paper (ClusterBlast was introduced in version 1):** Medema MH, Blin K, Cimermancic P, de Jager V, Zakrzewski P, Fischbach MA, Weber T, Takano E, Breitling R. antiSMASH: rapid identification, annotation and analysis of secondary metabolite biosynthesis gene clusters in bacterial and fungal genome sequences. Nucleic Acids Res. 2011 Jul;39(Web Server issue):W339-46. doi: 10.1093/nar/gkr466. Epub 2011 Jun 14. PMID: 21672958; PMCID: PMC3125804
+
+**Website (latest version):** https://antismash.secondarymetabolites.org/#!/start 
+
+.
